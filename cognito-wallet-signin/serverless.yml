@@ -1,0 +1,60 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: wallet-signin-resources
+
+custom:
+  USER_POOL_NAME: ${YOUR_POOL_NAME_HERE}
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+
+resources:
+  Resources:
+    UserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:custom.USER_POOL_NAME}
+        UsernameConfiguration:
+          CaseSensitive: false
+    UserPoolWebClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: UserPoolWebClient-${self:provider.stage}
+        GenerateSecret: false
+        UserPoolId: !Ref UserPool
+        ExplicitAuthFlows:
+          - ALLOW_REFRESH_TOKEN_AUTH
+          - ALLOW_CUSTOM_AUTH
+        PreventUserExistenceErrors: ENABLED
+  Outputs:
+    UserPoolId:
+      Value:
+        Ref: UserPool
+      Export:
+        Name: ${self:custom.USER_POOL_NAME}-${self:provider.stage}
+    UserPoolArn:
+      Value:
+        Fn::GetAtt: [UserPool, Arn]
+      Export:
+        Name: ${self:custom.USER_POOL_NAME}-Arn-${self:provider.stage}
+    UserPoolName:
+      Value: ${self:custom.USER_POOL_NAME}
+      Export:
+        Name: ${self:custom.USER_POOL_NAME}-Name-${self:provider.stage}
+    UserPoolWebClient:
+      Value:
+        Ref: UserPoolWebClient
+      Export:
+        Name: ${self:custom.USER_POOL_NAME}-Web-Client-${self:provider.stage}
